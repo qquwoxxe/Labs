@@ -18,5 +18,5 @@ def process_file(file_path):
                 transformed_number = ''.join(digit for digit in binary_number if digit != '0')
                 print(f'{transformed_number} {start_position}')
 
-process_file('Числа.txt')
+process_file('input.txt')
 

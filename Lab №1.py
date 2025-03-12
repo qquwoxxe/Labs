@@ -1,30 +1,35 @@
-# Написать программу, которая читая символы из бесконечной последовательности (эмулируется конечным файлом, читающимся поблочно), распознает, преобразует и выводит на экран лексемы по определенному правилу. Лексемы разделены пробелами. Преобразование делать по возможности через словарь. Для упрощения под выводом числа прописью подразумевается последовательный вывод всех цифр числа. Регулярные выражения использовать нельзя.
-# Нечетные двоичные числа, не превышающие 409510, в которых встречается ровно одна серия из трех подряд идущих нуля. Выводит на экран цифры числа, исключая нули. Отдельно выводится прописью номер позиции, с которой начинается эта серия.
-def check_number(number):
-    if number % 2 != 0 and number <= 4095:
-        binary_number = format(number, '012b')
+# Написать программу, которая читая символы из бесконечной последовательности (эмулируется конечным файлом, читающимся поблочно),
+# распознает, преобразует и выводит на экран лексемы по определенному правилу.
+# Лексемы разделены пробелами.
+# Преобразование делать по возможности через словарь.
+# Для упрощения под выводом числа прописью подразумевается последовательный вывод всех цифр числа.
+# Регулярные выражения использовать нельзя.
+# Нечетные двоичные числа, не превышающие 4095(10), в которых встречается ровно одна серия из трех подряд идущих нуля.
+# Выводит на экран цифры числа, исключая нули. Отдельно выводится прописью номер позиции, с которой начинается эта серия.
+index_dict = {
+    0: "ноль", 1: "один", 2: "два", 3: "три", 4: "четыре",
+    5: "пять", 6: "шесть", 7: "семь", 8: "восемь", 9: "девять",
+}
 
-        for i in range(len(binary_number) - 2):
-            if binary_number[i:i+3] == '000':
-                return True, i
+def check_number(binary_number):
+    if int(binary_number) % 2 != 0 and int(binary_number, 2) <= 4095:
+        count = binary_number.count('000')
+        if count == 1:
+            position = binary_number.find('000')
+            return True, position
     return False, 0
 
-def infinite_sequence():
-    num = 1
-    while True:
-        yield num
-        num += 1
+def process_file(file_path):
+    with open(file_path, 'r') as file:
+        for line in file:
+            binary_number = line.strip()
+            result, start_position = check_number(binary_number)
+            if result:
+                transformed_number = binary_number.replace('0', '')
+                index_word = index_dict.get(start_position, str(start_position))
+                print(f'{transformed_number} {index_word}')
 
-numbers = infinite_sequence()
-
-for number in numbers:
-    result, start_position = check_number(number)
-    if result:
-        binary_number = format(number, '012b')
-        transformed_number = ''.join([digit for digit in binary_number if digit != '0'])
-        print(f'{transformed_number} {start_position}')
-    if number >= 4095:
-        break
+process_file('numbers.txt')
 
 
 

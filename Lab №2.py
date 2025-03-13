@@ -12,22 +12,32 @@ index_dict = {
     5: "пять", 6: "шесть", 7: "семь", 8: "восемь", 9: "девять",
 }
 
+def extract_binary(part):
+    matched = re.match(r'^[01]{1,12}$', part)
+    return matched.group(0) if matched else None
+
 def check_number(binary_number):
-    if int(binary_number) % 2 != 0 and int(binary_number, 2) <= 4095:
-        count = len(re.findall('000', binary_number))
-        if count == 1:
+    try:
+        decimal = int(binary_number, 2)
+        if decimal % 2 != 0 and decimal <= 4095:
             position = binary_number.find('000')
-            return True, position
-    return False, 0
+            if position != -1 and binary_number.count('000') == 1:
+                return True, position
+        return False, 0
+    except ValueError:
+        return False, 0
 
 def process_file(file_path):
     with open(file_path, 'r') as file:
         for line in file:
-            binary_number = line.strip()
-            result, start_position = check_number(binary_number)
-            if result:
-                transformed_number = re.sub('0', '', binary_number)
-                index_word = index_dict.get(start_position, str(start_position))
-                print(f'{transformed_number} {index_word}')
+            parts = line.strip().split()
+            for part in parts:
+                binary_number = extract_binary(part)
+                if binary_number:
+                    result, start_position = check_number(binary_number)
+                    if result:
+                        transformed_number = binary_number.replace('0', '')
+                        index_word = index_dict.get(start_position, str(start_position))
+                        print(f'{transformed_number} {index_word}')
 
 process_file('numbers.txt')

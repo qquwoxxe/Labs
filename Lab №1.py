@@ -17,14 +17,13 @@ def extract_binary(part):
 
 def check_number(binary_number):
     try:
-        decimal = int(binary_number, 2)
-        if decimal % 2 != 0 and decimal <= 4095:
+        if int(binary_number, 2) % 2 != 0 and int(binary_number, 2) <= 4095:
             position = binary_number.find('000')
             if position != -1 and binary_number.count('000') == 1:
                 return True, position
         return False, 0
     except ValueError:
-        return False, 0 # Обработка ошибки
+        return False, 0
 
 def process_file(file_path):
     with open(file_path, 'r') as file:

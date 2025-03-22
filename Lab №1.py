@@ -16,20 +16,16 @@ def extract_binary(part):
     return binary_number if len(binary_number) <= 12 and all(c in '01' for c in binary_number) else None
 
 def check_number(binary_number):
-    try:
         if int(binary_number, 2) % 2 != 0 and int(binary_number, 2) <= 4095:
             position = binary_number.find('000')
             if position != -1 and binary_number.count('000') == 1:
                 return True, position
         return False, 0
-    except ValueError:
-        return False, 0
 
 def process_file(file_path):
     with open(file_path, 'r') as file:
          for line in file:
-            parts = line.strip().split()
-            for part in parts:
+            for part in line.strip().split():
                 binary_number = extract_binary(part)
                 if binary_number:
                     result, start_position = check_number(binary_number)

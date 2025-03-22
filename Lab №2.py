@@ -23,7 +23,6 @@ def check_number(binary_number):
             return True, position
     return False, 0
 
-
 def process_file(file_path):
     with open(file_path, 'r') as file:
         for line in file:
@@ -35,6 +34,5 @@ def process_file(file_path):
                         transformed_number = binary_number.replace('0', '')
                         index_word = index_dict.get(start_position, str(start_position))
                         print(f'{transformed_number} {index_word}')
-
 
 process_file('numbers.txt')

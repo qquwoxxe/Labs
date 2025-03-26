@@ -12,27 +12,21 @@ index_dict = {
 }
 
 def extract_binary(part):
-    binary_number = ''.join(filter(lambda c: c in '01', part))
-    return binary_number if len(binary_number) <= 12 and all(c in '01' for c in binary_number) else None
+    binary = ''.join(c for c in part if c in '01')
+    return binary if 0 < len(binary) <= 12 else None
 
-def check_number(binary_number):
-        if int(binary_number, 2) % 2 != 0 and int(binary_number, 2) <= 4095:
-            position = binary_number.find('000')
-            if position != -1 and binary_number.count('000') == 1:
-                return True, position
-        return False, 0
+def check_number(binary):
+    num = int(binary, 2)
+    return (num % 2 != 0 and num <= 4095 and binary.count('000') == 1, binary.find('000'))
 
 def process_file(file_path):
-    with open(file_path, 'r') as file:
-         for line in file:
-            for part in line.strip().split():
-                binary_number = extract_binary(part)
-                if binary_number:
-                    result, start_position = check_number(binary_number)
-                    if result:
-                        transformed_number = binary_number.replace('0', '')
-                        index_word = index_dict.get(start_position, str(start_position))
-                        print(f'{transformed_number} {index_word}')
+    with open(file_path) as f:
+        for line in f:
+            for part in line.split():
+                if binary := extract_binary(part):
+                    valid, pos = check_number(binary)
+                    if valid:
+                        print(f"{binary.replace('0', '')} {index_dict.get(pos, pos)}")
 
 process_file('numbers.txt')
 

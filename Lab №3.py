@@ -10,72 +10,156 @@
 # Выводятся по мере формирования А, F и все матричные операции последовательно.
 # Решить на python, библиотечными методами numpy пользоваться нельзя.
 
-import random
+from typing import List
 
-# Ввод чисел K и N
-K = int(input("Введите число K: "))
-N = int(input("Введите размер матрицы N: "))
+def read_numbers_from_file(filename: str, count: int) -> List[int]:
+    '''Чтение чисел из файла'''
+    numbers = []
+    with open(filename, 'r') as f:
+        for line in f:
+            numbers.extend(map(int, line.strip().split()))
+            if len(numbers) >= count:
+                break
+    return numbers[:count]
 
-# Генерация матрицы A с целыми числами в диапазоне [-10, 10]
-A = [[random.randint(-10, 10) for _ in range(N)] for _ in range(N)]
-print("Матрица A:")
-for row in A:
-    print(row)
+def create_matrix_from_numbers(numbers: List[int], n: int) -> List[List[int]]:
+    '''Преобразование списка чисел в матрицу'''
+    return [numbers[i * n:(i + 1) * n] for i in range(n)]
 
-# Копируем матрицу A в F
-F = [row[:] for row in A]
+def print_matrix(matrix: List[List[int]], title: str = ""):
 
-# Разделяем матрицу на области
-area1 = A[:N//2]
-area2 = [row[N//2:] for row in A]
-area3 = A[N//2:]
-area4 = [row[:N//2] for row in A]
+    if title:
+        print(title)
+    for row in matrix:
+        print(" ".join(f"{elem:4}" for elem in row))
+    print()
 
-# Подсчет чисел > K в нечетных столбцах области 4
-count_greater_K = sum(1 for i in range(len(area4)) for j in range(1, N//2, 2) if area4[i][j] > K)
+def count_greater_than_k_in_area4(matrix: List[List[int]], k: int) -> int:
+    '''Подсчёт чисел > K в нечетных строках области 4'''
+    n = len(matrix)
+    count = 0
+    center = n // 2
+    for i in range(n):
+        for j in range(n):
+            if i == j or i + j == n - 1:
+                continue
+            if not (i < center and j > i and j < n - i - 1) and \
+                    not (j > center and (i < j or i + j >= n)) and \
+                    not (i > center and j < i and j > n - i - 1):
+                if i % 2 != 0 and matrix[i][j] > k:
+                    count += 1
+    return count
 
-# Подсчет произведения чисел в нечетных строках области 2
-odd_rows = 1
-for row in range(1, len(area2), 2):
-    for col in range(len(area2[row])):
-        odd_rows *= area2[row][col]
+def product_in_area2(matrix: List[List[int]]) -> int:
+    '''Произведение чисел в нечетных строках области 2'''
+    n = len(matrix)
+    product = 1
+    center = n // 2
+    for i in range(n):
+        if i % 2 != 0:
+            for j in range(n):
+                if j > center and i < j and i != j and i + j != n - 1 and i + j >= n - 1:
+                    product *= matrix[i][j]
+    return product
 
-# Меняем области в зависимости от условия
-if count_greater_K > odd_rows:
-    # Симметричный обмен областей 1 и 3
-    for i in range(N//2):
-        F[i], F[i + N//2] = A[i + N//2], A[i]
-else:
-    # Несимметричный обмен областей 1 и 2
-    for i in range(N//2):
-        F[i][:N//2] = area2[i][:N//2]
+def swap_areas_1_3_symmetrically(matrix: List[List[int]]) -> List[List[int]]:
+    '''Симметричный обмен областей 1 и 3'''
+    n = len(matrix)
+    new_matrix = [row.copy() for row in matrix]
+    center = n // 2
+    for i in range(center):
+        for j in range(i + 1, n - i - 1):
+            mirror_i = n - 1 - i
+            if i < center and j > i and j < n - i - 1:
+                if mirror_i > center and j < mirror_i and j > n - mirror_i - 1:
+                    new_matrix[i][j], new_matrix[mirror_i][j] = new_matrix[mirror_i][j], new_matrix[i][j]
+    return new_matrix
 
-print("Матрица F:")
-for row in F:
-    print(row)
+def swap_areas_1_2_asymmetrically(matrix: List[List[int]]) -> List[List[int]]:
+    '''Несимметричный обмен областей 1 и 2'''
+    n = len(matrix)
+    new_matrix = [row.copy() for row in matrix]
+    center = n // 2
 
-# Вычисляем итоговое выражение ((K*A)*F + K*F^T)
-def matrix_mult(mat1, mat2):
-    result = [[0] * len(mat2[0]) for _ in range(len(mat1))]
-    for i in range(len(mat1)):
-        for j in range(len(mat2[0])):
-            for k in range(len(mat2)):
-                result[i][j] += mat1[i][k] * mat2[k][j]
+    area1 = []
+    area2 = []
+
+    for i in range(n):
+        for j in range(n):
+            if i == j or i + j == n - 1:
+                continue
+            if i < center and j > i and j < n - i - 1:
+                area1.append((i, j))
+            elif j > center and (i < j or i + j >= n):
+                area2.append((i, j))
+
+    for (i1, j1), (i2, j2) in zip(area1, area2):
+        new_matrix[i1][j1], new_matrix[i2][j2] = new_matrix[i2][j2], new_matrix[i1][j1]
+    return new_matrix
+
+def matrix_multiply(a: List[List[int]], b: List[List[int]]) -> List[List[int]]:
+    """Умножение матриц"""
+    n = len(a)
+    result = [[0] * n for _ in range(n)]
+    for i in range(n):
+        for j in range(n):
+            for k in range(n):
+                result[i][j] += a[i][k] * b[k][j]
     return result
 
-# Транспонирование матрицы F
-def transpose(mat):
-    return [[mat[j][i] for j in range(len(mat))] for i in range(len(mat[0]))]
+def matrix_transpose(matrix: List[List[int]]) -> List[List[int]]:
+    return [[matrix[j][i] for j in range(len(matrix))] for i in range(len(matrix))]
 
-# Умножение K*A на F
-KA_mult_F = matrix_mult([[K * val for val in row] for row in A], F)
+def matrix_add(a: List[List[int]], b: List[List[int]]) -> List[List[int]]:
+    return [[a[i][j] + b[i][j] for j in range(len(a))] for i in range(len(a))]
 
-# Умножение K на транспонированное F
-K_F_T = [[K * val for val in row] for row in transpose(F)]
+def scalar_multiply_matrix(k: int, matrix: List[List[int]]) -> List[List[int]]:
+    return [[k * matrix[i][j] for j in range(len(matrix))] for i in range(len(matrix))]
 
-# Суммируем
-result = [[KA_mult_F[i][j] + K_F_T[i][j] for j in range(len(KA_mult_F[0]))] for i in range(len(KA_mult_F))]
+def main():
+    FILENAME = "numbers.txt"
+    K = int(input("Введите число K: "))
+    N = int(input("Введите размер матрицы N: "))
 
-print("Результат матричных операций:")
-for row in result:
-    print(row)
+    numbers = read_numbers_from_file(FILENAME, N * N)
+    if len(numbers) < N * N:
+        print(f"Нужно {N * N} чисел, в файле {len(numbers)}")
+        return
+
+    A = create_matrix_from_numbers(numbers, N)
+    print_matrix(A, "Исходная матрица A:")
+
+    F = [row.copy() for row in A]
+
+    count4 = count_greater_than_k_in_area4(A, K)
+    product2 = product_in_area2(A)
+
+    print(f"Чисел > K в области 4: {count4}")
+    print(f"Произведение в области 2: {product2}")
+
+    if count4 > product2:
+        print("Меняем области 1 и 3 симметрично")
+        F = swap_areas_1_3_symmetrically(F)
+    else:
+        print("Меняем области 1 и 2 несимметрично")
+        F = swap_areas_1_2_asymmetrically(F)
+
+    print_matrix(F, "Матрица F после преобразования:")
+
+    KA = scalar_multiply_matrix(K, A)
+    print_matrix(KA, "Матрица K*A:")
+
+    KAF = matrix_multiply(KA, F)
+    print_matrix(KAF, "Матрица (K*A)*F:")
+
+    FT = matrix_transpose(F)
+    print_matrix(FT, "Матрица F^T:")
+
+    KFT = scalar_multiply_matrix(K, FT)
+    print_matrix(KFT, "Матрица K*F^T:")
+
+    result = matrix_add(KAF, KFT)
+    print_matrix(result, "Результат ((K*A)*F + K*F^T):")
+
+if __name__ == "__main__":
+    main()

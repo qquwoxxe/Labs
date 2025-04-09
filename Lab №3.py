@@ -27,7 +27,6 @@ def create_matrix_from_numbers(numbers: List[int], n: int) -> List[List[int]]:
     return [numbers[i * n:(i + 1) * n] for i in range(n)]
 
 def print_matrix(matrix: List[List[int]], title: str = ""):
-
     if title:
         print(title)
     for row in matrix:

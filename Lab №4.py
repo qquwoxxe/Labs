@@ -35,11 +35,15 @@ def create_matrix_a(n: int) -> np.ndarray:
     half = n // 2
     numbers = read_numbers_from_file(4 * half * half)
 
-    # Разделение на подматрицы с использованием срезов NumPy
+    # Разделение на подматрицы
     e = np.array(numbers[:half * half]).reshape(half, half)
+    print_matrix(e, 'Подматрица E')
     b = np.array(numbers[half * half: 2 * half * half]).reshape(half, half)
+    print_matrix(b, 'Подматрица B')
     d = np.array(numbers[2 * half * half: 3 * half * half]).reshape(half, half)
+    print_matrix(d, 'Подматрица D')
     c = np.array(numbers[3 * half * half: 4 * half * half]).reshape(half, half)
+    print_matrix(c, 'Подматрица С')
 
     return np.block([[e, b], [d, c]])
 
@@ -54,7 +58,8 @@ def form_matrix_f(a: np.ndarray) -> np.ndarray:
     f = a.copy()
     n = a.shape[0]
     half = n // 2
-    e_sub = f[:half, :half]
+    e_sub = f[:half, :half].copy()
+    b_sub = f[:half, half:].copy()
 
     zero_count = np.sum(e_sub[:, 1::2] == 0)
     sum_odd = np.sum(e_sub[1::2, :])
@@ -64,8 +69,9 @@ def form_matrix_f(a: np.ndarray) -> np.ndarray:
     if zero_count > sum_odd:
         # Симметричный обмен B и E
         print("меняем B и E симметрично")
-        f[:half, :half], f[:half, half:] = \
-            np.fliplr(f[:half, half:]), np.fliplr(e_sub)
+        f[:half, :half] = b_sub
+        f[:half, half:] = e_sub
+
     else:
         # Несимметричный обмен C и E
         print("меняем C и E несимметрично")
@@ -106,7 +112,7 @@ def main():
 
 
     A = create_matrix_a(N)
-    print_matrix(A, "Исходная матрица A:")
+    print_matrix(A, "Собранная матрица A:")
 
     F = form_matrix_f(A)
     print_matrix(F, "Матрица F после преобразования:")

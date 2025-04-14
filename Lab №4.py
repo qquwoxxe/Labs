@@ -59,7 +59,6 @@ def form_matrix_f(a: np.ndarray) -> np.ndarray:
     n = a.shape[0]
     half = n // 2
     e_sub = f[:half, :half].copy()
-    b_sub = f[:half, half:].copy()
 
     zero_count = np.sum(e_sub[:, 1::2] == 0)
     sum_odd = np.sum(e_sub[1::2, :])
@@ -69,8 +68,8 @@ def form_matrix_f(a: np.ndarray) -> np.ndarray:
     if zero_count > sum_odd:
         # Симметричный обмен B и E
         print("меняем B и E симметрично")
-        f[:half, :half] = b_sub
-        f[:half, half:] = e_sub
+        f[:half, :half], f[:half, half:] = \
+            np.fliplr(f[:half, half:]), np.fliplr(e_sub)
 
     else:
         # Несимметричный обмен C и E

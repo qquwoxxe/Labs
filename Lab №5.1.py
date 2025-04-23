@@ -118,9 +118,9 @@ points = [(i, i) for i in range(9)] + [(i, 0) for i in range(8)]
 start = time.time()
 alg_result, alg_max = algorithmic_approach_optimized(points)
 print(f"Алгоритмический подход (оптимизированный): {time.time() - start:.4f} сек")
-print(f"Максимальный размер подмножества: {alg_max}, найдено {len(alg_result)} подмножеств")
+print(f"Максимальный размер множества: {alg_max}, найдено {len(alg_result)} множеств")
 
 start = time.time()
 opt_result, opt_max = optimized_approach_enhanced(points)
 print(f"\nОптимизированный подход (усложненный): {time.time() - start:.4f} сек")
-print(f"Максимальный размер подмножества: {opt_max}, найдено {len(opt_result)} подмножеств")
+print(f"Максимальный размер множества: {opt_max}, найдено {len(opt_result)} множеств")

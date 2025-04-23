@@ -75,7 +75,6 @@ def algorithmic_approach_optimized(points):
 def optimized_approach_enhanced(points):
     n = len(points)
     lines = defaultdict(set)
-    # Группируем точки по прямым
     for i in range(n):
         for j in range(i + 1, n):
             p1, p2 = points[i], points[j]

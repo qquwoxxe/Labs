@@ -87,8 +87,8 @@ points = [(i, i) for i in range(8)] + [(i, 0) for i in range(8)]
 # Замер времени
 start = time.time()
 alg_result = algorithmic_approach(points)
-print(f"Алгоритмический подход: {time.time() - start:.4f} сек, найдено {len(alg_result)} подмножеств")
+print(f"Алгоритмический подход: {time.time() - start:.4f} сек, найдено {len(alg_result)} множеств")
 
 start = time.time()
 opt_result = optimized_approach(points)
-print(f"Оптимизированный подход: {time.time() - start:.4f} сек, найдено {len(opt_result)} подмножеств")
+print(f"Оптимизированный подход: {time.time() - start:.4f} сек, найдено {len(opt_result)} множеств")

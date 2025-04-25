@@ -42,8 +42,8 @@ def get_line(p1, p2):
     return (a, b, c)
 
 def are_colinear(points):
-    if len(points) < 3:
-        return False  # Ограничение: минимум 3 точки
+    if len(points) <= 2:
+        return True
     x1, y1 = points[0]
     x2, y2 = points[1]
     dx = x2 - x1
@@ -53,26 +53,17 @@ def are_colinear(points):
             return False
     return True
 
-def algorithmic_approach_optimized(points):
+def algorithmic_approach(points):
     n = len(points)
     unique_subsets = set()
-    max_size = 0
-    # Перебор масок только для подмножеств >=3 точек
     for mask in range(1, 1 << n):
-        bit_count = bin(mask).count('1')
-        if bit_count < 3:
-            continue  # Пропускаем маски с <3 точками
         subset = [points[i] for i in range(n) if (mask >> i) & 1]
         if are_colinear(subset):
             unique = frozenset((x, y) for (x, y) in subset)
             unique_subsets.add(unique)
-            if bit_count > max_size:
-                max_size = bit_count
-    # Фильтрация подмножеств по максимальному размеру
-    result = [list(s) for s in unique_subsets if len(s) == max_size]
-    return result, max_size
+    return [list(s) for s in unique_subsets]
 
-def optimized_approach_enhanced(points):
+def optimized_approach(points):
     n = len(points)
     lines = defaultdict(set)
     for i in range(n):
@@ -80,47 +71,39 @@ def optimized_approach_enhanced(points):
             p1, p2 = points[i], points[j]
             line = get_line(p1, p2)
             if line is not None:
-                lines[line].add(i)
-                lines[line].add(j)
-    # Удаляем прямые с <3 точками
-    lines_filtered = {k: v for k, v in lines.items() if len(v) >= 3}
-    max_size = 0
-    result = []
-    # Генерируем подмножества >=3 точек для каждой прямой
-    for line, indices in lines_filtered.items():
+                lines[line].update({i, j})
+    unique_subsets = set()
+    for indices in lines.values():
         m = len(indices)
         indices_list = list(indices)
-        # Перебор масок только для подмножеств >=3 точек
         for mask in range(1, 1 << m):
-            bit_count = bin(mask).count('1')
-            if bit_count < 3:
-                continue
-            subset_indices = {indices_list[k] for k in range(m) if (mask >> k) & 1}
-            subset = [points[i] for i in subset_indices]
-            # Обновляем максимальный размер
-            if bit_count > max_size:
-                max_size = bit_count
-                result = [subset]
-            elif bit_count == max_size:
-                result.append(subset)
-    # Удаляем дубликаты
-    unique_result = []
-    seen = set()
-    for subset in result:
-        key = frozenset((x, y) for (x, y) in subset)
-        if key not in seen:
-            seen.add(key)
-            unique_result.append(subset)
-    return unique_result, max_size
+            subset = frozenset(indices_list[k] for k in range(m) if (mask >> k) & 1)
+            unique_subsets.add(subset)
+    return [[points[i] for i in s] for s in unique_subsets]
 
-points = [(i, i) for i in range(9)] + [(i, 0) for i in range(8)]
+# Фильтрация точек: только чётные координаты
+points = list({
+    (i, i) for i in range(8) if i % 2 == 0
+} | {
+    (i, 0) for i in range(8) if i % 2 == 0
+})
 
+# Замер времени и вывод результатов
 start = time.time()
-alg_result, alg_max = algorithmic_approach_optimized(points)
-print(f"Алгоритмический подход (оптимизированный): {time.time() - start:.4f} сек")
-print(f"Максимальный размер множества: {alg_max}, найдено {len(alg_result)} множеств")
 
-start = time.time()
-opt_result, opt_max = optimized_approach_enhanced(points)
-print(f"\nОптимизированный подход (усложненный): {time.time() - start:.4f} сек")
-print(f"Максимальный размер множества: {opt_max}, найдено {len(opt_result)} множеств")
+# Вывод статистики
+alg_result = algorithmic_approach(points)
+print(f"[Алгоритмический подход] Время: {time.time() - start:.4f} сек, Найдено: {len(alg_result)} подмножеств")
+for subset in alg_result[:5]:
+    print(f"  {subset}")
+if len(alg_result) > 0:
+    max_alg = max(len(s) for s in alg_result)
+    print(f"Максимальное подмножество: {max_alg} точек")
+
+opt_result = optimized_approach(points)
+print(f"[Оптимизированный подход] Время: {time.time() - start:.4f} сек, Найдено: {len(opt_result)} подмножеств")
+for subset in opt_result[:5]:
+    print(f"  {subset}")
+if len(opt_result) > 0:
+    max_opt = max(len(s) for s in opt_result)
+    print(f"Максимальное подмножество: {max_opt} точек")

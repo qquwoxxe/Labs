@@ -95,12 +95,12 @@ def optimized_approach(points, max_distance):
 
 # Фильтрация точек: только чётные координаты
 points = list({
-    (i, i) for i in range(8)
+    (i, i) for i in range(5)
 } | {
-    (i, 0) for i in range(8)
+    (i, 0) for i in range(5)
 })
 
-max_distance = 0.1
+max_distance = 1
 
 # Замер времени и вывод результатов
 start = time.time()

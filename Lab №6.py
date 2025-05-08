@@ -4,38 +4,66 @@
 # Результаты сравнительного исследования времени вычисления представить в табличной и
 # графической форме в виде отчета по лабораторной работе.
 # 17. F(1) = 1, F(n) =(-1)n*(F(n–1) /(2n)!-(n + n!)), при четных n > 1 F(n)=sin(n) при нечетных n > 1
-import math
+
 import time
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
-def F_rec(n):
-    if n == 1:
+def fact(k):
+    if k == 1:
         return 1
-    if n % 2 == 0:
-        return ((-1)**n) * (F_rec(n-1) / math.factorial(2 * n) - (n + math.factorial(n)))
     else:
-        return math.sin(n)
+        return k * fact(k - 1)
+
+def F_rec(n, memo=None):
+    if memo is None:
+        memo = {}
+    if n == 1 or n == 2:
+        return 1
+    if n not in memo:
+        factorial_2n = fact(2 * n)
+        memo[n] = (-1 if n % 2 else 1) * (F_rec(n - 1, memo) / factorial_2n - 4 * F_rec(n - 2, memo))
+    return memo[n]
+
 
 def F_iter(n):
-    if n == 1:
-        return 1
-    f_prev = 1.0
-    for i in range(2, n+1):
-        if i % 2 == 0:
-            f_prev = ((-1)**i) * (f_prev / math.factorial(2 * i) - (i + math.factorial(i)))
-        else:
-            f_prev = math.sin(i)
+    if n == 1 or n == 2:
+        return 1.0
+
+    # Инициализация начальных значений с плавающей точкой
+    f_prev_prev = 1.0  # F(1)
+    f_prev = 1.0  # F(2)
+    fact_2i_prev = 24.0  # 4! (соответствует i=2), как float
+
+    for i in range(3, n + 1):
+        two_i = 2 * i
+
+        # Вычисляем (2i)! инкрементально, используя предыдущее значение
+        fact_2i = fact_2i_prev * (two_i - 1) * two_i
+
+        # Определяем знак (-1)^i
+        sign = -1 if i % 2 else 1  # Эквивалент (-1)**i
+
+        # Вычисляем текущее значение F(i)
+        term = f_prev / fact_2i
+        term -= 4 * f_prev_prev
+        f_current = sign * term
+
+        # Обновляем значения для следующей итерации
+        f_prev_prev, f_prev = f_prev, f_current
+        fact_2i_prev = fact_2i
+
     return f_prev
 
 def measure_time(func, n):
+    # Измерение времени выполнения функции
     start = time.perf_counter()
     result = func(n)
     end = time.perf_counter()
     return end - start, result
 
-ns = [1, 2, 3, 4, 5, 10, 15, 20, 25, 30]
+ns = [1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 100]
 rec_times = []
 iter_times = []
 rec_values = []
@@ -64,7 +92,7 @@ for i, n in enumerate(ns):
 
 plt.figure(figsize=(10, 6))
 plt.plot(ns, rec_times, label='Recursive')
-plt.plot(ns, iter_times, label='Iterative')
+plt.plot(ns, iter_times, label='Iterative Optimized')
 plt.xlabel('n')
 plt.ylabel('Time (seconds)')
 plt.title('Сравнение времени выполнения рекурсивного и итерационного подходов')
@@ -72,3 +100,4 @@ plt.legend()
 plt.grid(True)
 plt.savefig('time_comparison.png')
 plt.show()
+

@@ -91,7 +91,7 @@ def load_and_show_file(filename):
         visualize_semicircles(semicircles, canvas)
         file_content_label.config(text=f"Файл: {filename.split('/')[-1]}")
         log_message(f"Успешно загружен файл: {filename}")
-        show_original()  # Показываем исходную визуализацию
+        show_original()
 
     except FileNotFoundError:
         messagebox.showerror("Ошибка", f"Файл {filename} не найден.")
@@ -191,7 +191,6 @@ def draw_pie_chart(data, title, palette):
     if total == 0:
         return
 
-    # Получаем размеры холста
     width = canvas.winfo_width()
     height = canvas.winfo_height()
     if width < 10 or height < 10:

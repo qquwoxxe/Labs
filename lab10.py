@@ -44,7 +44,7 @@ def computer_move():
     if available_corners:
         return random.choice(available_corners)
 
-    # Случайный ход
+
     return random.choice(game_left)
 
 
